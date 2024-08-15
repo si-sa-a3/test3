@@ -21,26 +21,32 @@ jobs:
         echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
 
     - name: Copy GitHub Project
-      run: |
-        gh api graphql -f query='
-        {
-          organization(login: "si-sa-a3") {
-            projects(first: 100) {
+  run: |
+    gh api graphql -f query='
+    {
+      organization(login: "si-sa-a3") {
+        projects(first: 100) {
+          nodes {
+            number
+            name
+            body
+            columns(first: 100) {
               nodes {
-                number
                 name
-                body
-                columns(first: 100) {
-                  nodes {
-                    name
-                    id
-                  }
-                }
+                id
               }
             }
           }
-        }' > original_project.json
-      cat original_project.json
+        }
+      }
+    }' > original_project.json
+    cat original_project.json
+
+          # Extract necessary information
+          title=$(jq -r '.title' original_project.json)
+          description=$(jq -r '.description' original_project.json)
+
+          echo "title=$title" >> $GITHUB_ENV
 
     - name: Create Token
       id: create-token2
