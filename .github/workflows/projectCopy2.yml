@@ -23,19 +23,12 @@ jobs:
     - name: Copy GitHub Project
       run: |
         gh api graphql -f query='
-        {
+        query{
           organization(login: "si-sa-a3") {
-            projects(first: 100) {
+            projectsV2(first: 2) {
               nodes {
-                number
-                name
-                body
-                columns(first: 100) {
-                  nodes {
-                    name
-                    id
-                  }
-                }
+                id
+                title
               }
             }
           }
