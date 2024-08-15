@@ -18,4 +18,4 @@ jobs:
         echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
     - name: Create Project
       run: |
-        gh project create --owner si-sa-a --title "My Project"
+        gh project create --owner si-sa-a3 --title "My Project"
