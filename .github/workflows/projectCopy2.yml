@@ -36,4 +36,4 @@ jobs:
           NEW_ORG: si-sa-a2
       run: |
           # Step 1: Get original project data
-          gh project view --owner $ORIGINAL_ORG $PROJECT_NUMBER --format json title,description,fields > original_project.json
+          gh project view $ORIGINAL_ORG/$PROJECT_NUMBER --json title,description,fields > original_project.json
