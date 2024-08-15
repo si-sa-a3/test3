@@ -40,13 +40,13 @@ jobs:
 
           # Extract necessary information
           title=$(jq -r '.title' original_project.json)
-          description=$(jq -r '.description' original_project.json)
+          # description=$(jq -r '.description' original_project.json)
 
           # Step 2: Create new project
-          gh project create --owner $NEW_ORG --title "$title" --description "$description"
+          gh project create --owner $NEW_ORG --title "$title"
 
           # Get new project ID
-          new_project_id=$(gh project list --owner $NEW_ORG --json id,title | jq -r --arg title "$title" '.[] | select(.title == $title) | .id')
+          new_project_id=$(gh project list --owner $NEW_ORG --format json id,title | jq -r --arg title "$title" '.[] | select(.title == $title) | .id')
 
           # Step 3: Add fields to new project
           fields=$(jq -c '.fields[]' original_project.json)
