@@ -1,0 +1,22 @@
+name: Copy Project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Token
+      id: create-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.PEM }}
+    - name: Authenticate with CLI
+      run: |
+        echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
+    - name: Copy Project
+      run: |
+        ID=$(gh project list --format json --owner si-sa-a3 --jq '.projects[] | select(.title == "My Project") | .id')
+        gh project copy $ID --source-owner si-sa-a3 --target-owner si-sa-a
