@@ -41,17 +41,14 @@ jobs:
             organization(login: "'"$ORIGINAL_ORG"'") {
               projectV2(number: '"$PROJECT_NUMBER"') {
                 title
-                description
                 fields(first: 100) {
                   nodes {
-                    name
-                    dataType
+                    ... on ProjectV2FieldCommon {
+                      name
+                      dataType
+                    }
                   }
                 }
               }
             }
           }' > original_project.json
-          
-          # Extract necessary information
-          title=$(jq -r '.data.organization.projectV2.title' original_project.json)
-          # description=$(jq -r '.data.organization.projectV2.description' original_project.json)
