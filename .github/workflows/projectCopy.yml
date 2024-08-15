@@ -13,6 +13,7 @@ jobs:
       with:
         app-id: ${{ secrets.APP_ID }}
         private-key: ${{ secrets.PEM }}
+        repository: si-sa-a3/test3
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
@@ -22,6 +23,7 @@ jobs:
       with:
         app-id: ${{ secrets.A2_APP_ID }}
         private-key: ${{ secrets.A2_PEM }}
+        repository: si-sa-a2/test2
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
