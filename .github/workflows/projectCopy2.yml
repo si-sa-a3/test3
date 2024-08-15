@@ -33,24 +33,14 @@ jobs:
                 columns(first: 100) {
                   nodes {
                     name
-                    cards(first: 100) {
-                      nodes {
-                        note
-                      }
-                    }
+                    id
                   }
                 }
               }
             }
           }
         }' > original_project.json
-        cat original_project.json
-
-          # Extract necessary information
-          title=$(jq -r '.title' original_project.json)
-          description=$(jq -r '.description' original_project.json)
-
-          echo "title=$title" >> $GITHUB_ENV
+      cat original_project.json
 
     - name: Create Token
       id: create-token2
