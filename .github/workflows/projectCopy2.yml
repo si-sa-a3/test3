@@ -22,10 +22,22 @@ jobs:
 
     - name: Copy GitHub Project
       run: |
-          # Step 1: Get original project data
-          gh api -H "Accept: application/vnd.github.inertia-preview+json" \
-            /orgs/si-sa-a3/projects/4 > original_project.json
-          cat original_project.json
+        gh api graphql -f query='
+        {
+          organization(login: "si-sa-a3") {
+            projectNext(number: 4) {
+              title
+              description
+              fields(first: 100) {
+                nodes {
+                  name
+                  dataType
+                }
+              }
+            }
+          }
+        }' > original_project.json
+        cat original_project.json
 
           # Extract necessary information
           title=$(jq -r '.title' original_project.json)
