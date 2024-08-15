@@ -30,25 +30,7 @@ jobs:
       run: |
         echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
     - name: Copy GitHub Project
-      env:
-          ORIGINAL_ORG: si-sa-a3
-          PROJECT_NUMBER: 1
-          NEW_ORG: si-sa-a2
       run: |
           # Step 1: Get original project data
-          gh api graphql -f query='
-          {
-            organization(login: "'"$ORIGINAL_ORG"'") {
-              projectV2(number: '"$PROJECT_NUMBER"') {
-                title
-                fields(first: 100) {
-                  nodes {
-                    ... on ProjectV2FieldCommon {
-                      name
-                      dataType
-                    }
-                  }
-                }
-              }
-            }
-          }' > original_project.json
+          gh project view 1 --owner si-sa-a3 --format json > original_project.json
+          cat original_project.json
