@@ -39,10 +39,10 @@ jobs:
           gh api graphql -f query='
           {
             organization(login: "'"$ORIGINAL_ORG"'") {
-              projectNext(number: '"$PROJECT_NUMBER"') {
+              projectV2(number: '"$PROJECT_NUMBER"') {
                 title
                 description
-                fields {
+                fields(first: 100) {
                   nodes {
                     name
                     dataType
@@ -53,5 +53,5 @@ jobs:
           }' > original_project.json
           
           # Extract necessary information
-          title=$(jq -r '.data.organization.projectNext.title' original_project.json)
-          # description=$(jq -r '.data.organization.projectNext.description' original_project.json)
+          title=$(jq -r '.data.organization.projectV2.title' original_project.json)
+          # description=$(jq -r '.data.organization.projectV2.description' original_project.json)
