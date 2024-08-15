@@ -31,5 +31,4 @@ jobs:
         echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
     - name: Copy Project
       run: |
-        NUMBER=$(gh project list --format json --owner si-sa-a3 --jq '.projects[] | select(.title == "My Project") | .number')
-        gh project copy $NUMBER --source-owner si-sa-a3 --target-owner si-sa-a2 --title "copy Project"
+        gh project copy 1 --source-owner si-sa-a3 --target-owner si-sa-a2 --title "copy Project"
