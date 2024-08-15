@@ -15,9 +15,11 @@ jobs:
         private-key: ${{ secrets.PEM }}
         owner: si-sa-a3
         repositories: test3
+        
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
+
     - name: Copy GitHub Project
       run: |
           # Step 1: Get original project data
@@ -29,6 +31,7 @@ jobs:
           description=$(jq -r '.description' original_project.json)
 
           echo "title=$title" >> $GITHUB_ENV
+
     - name: Create Token
       id: create-token2
       uses: actions/create-github-app-token@v1
@@ -37,9 +40,11 @@ jobs:
         private-key: ${{ secrets.A2_PEM }}
         owner: si-sa-a2
         repositories: test2
+
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
+
       # Step 2: Create new project
     - name: Create new project
       run: |
@@ -50,3 +55,12 @@ jobs:
       run: |
         new_project_id=$(gh project list --owner si-sa-a2 --format json --jq '.projects[] | select(.title == "$title") | .id')
         echo "::set-output name=new_project_id::$new_project_id"
+
+    - name: Add fields to new project
+      run: |
+        fields=$(jq -c '.fields[]' original_project.json)
+        for field in $fields; do
+          name=$(echo $field | jq -r '.name')
+          dataType=$(echo $field | jq -r '.dataType')
+          gh project field create --project-id "${{ steps.get_new_project_id.outputs.new_project_id }}" --name "$name" --type "$dataType"
+        done
