@@ -32,5 +32,5 @@ jobs:
     - name: Copy GitHub Project
       run: |
           # Step 1: Get original project data
-          gh project view 3 --owner si-sa-a3 --format json > original_project.json
+          gh project view 4 --owner si-sa-a3 --format json > original_project.json
           cat original_project.json
