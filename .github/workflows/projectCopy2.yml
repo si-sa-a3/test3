@@ -23,7 +23,8 @@ jobs:
     - name: Copy GitHub Project
       run: |
           # Step 1: Get original project data
-          gh project view 4 --owner si-sa-a3 --format json > original_project.json
+          gh api -H "Accept: application/vnd.github.inertia-preview+json" \
+            /orgs/si-sa-a3/projects/4 > original_project.json
           cat original_project.json
 
           # Extract necessary information
