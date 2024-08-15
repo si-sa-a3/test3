@@ -25,13 +25,17 @@ jobs:
         gh api graphql -f query='
         {
           organization(login: "si-sa-a3") {
-            projectNext(number: 4) {
-              title
-              description
-              fields(first: 100) {
+            project(number: 4) {
+              name
+              body
+              columns(first: 100) {
                 nodes {
                   name
-                  dataType
+                  cards(first: 100) {
+                    nodes {
+                      note
+                    }
+                  }
                 }
               }
             }
