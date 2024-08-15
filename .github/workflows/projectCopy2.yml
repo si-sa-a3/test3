@@ -44,4 +44,10 @@ jobs:
     - name: Create new project
       run: |
         gh project create --owner si-sa-a2 --title "$title"
-    
+
+    - name: Get new project ID
+      id: get_new_project_id
+      run: |
+        new_project_id=$(gh project list --owner si-sa-a2 --format json --jq '.[] | select(.title == "'${{ steps.extract_info.outputs.title }}'") | .id')
+        echo "::set-output name=new_project_id::$new_project_id"
+        
