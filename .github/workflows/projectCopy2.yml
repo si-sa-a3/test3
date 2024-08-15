@@ -23,6 +23,12 @@ jobs:
           # Step 1: Get original project data
           gh project view 4 --owner si-sa-a3 --format json > original_project.json
           cat original_project.json
+
+          # Extract necessary information
+          title=$(jq -r '.title' original_project.json)
+          description=$(jq -r '.description' original_project.json)
+
+          echo "title=$title" >> $GITHUB_ENV
     - name: Create Token
       id: create-token2
       uses: actions/create-github-app-token@v1
@@ -34,3 +40,8 @@ jobs:
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
+      # Step 2: Create new project
+    - name: Create new project
+      run: |
+        gh project create --owner si-sa-a2 --title "$title"
+    
