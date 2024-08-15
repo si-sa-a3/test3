@@ -20,5 +20,5 @@ jobs:
       run: |
         gh project create --owner si-sa-a3 --title "My Project"
     - name: List
-     run: |
+      run: |
         gh project list --owner si-sa-a3
