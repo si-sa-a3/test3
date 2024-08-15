@@ -18,6 +18,11 @@ jobs:
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
+    - name: Copy GitHub Project
+      run: |
+          # Step 1: Get original project data
+          gh project view 4 --owner si-sa-a3 --format json > original_project.json
+          cat original_project.json
     - name: Create Token
       id: create-token2
       uses: actions/create-github-app-token@v1
@@ -29,8 +34,3 @@ jobs:
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
-    - name: Copy GitHub Project
-      run: |
-          # Step 1: Get original project data
-          gh project list --owner si-sa-a3 --format json > original_project.json
-          cat original_project.json
