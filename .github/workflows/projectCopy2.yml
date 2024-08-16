@@ -53,9 +53,14 @@ jobs:
                     name
                     dataType
                   }
-                  ... on ProjectV2SingleSelectField {
+                  ... on ProjectV2SingleSelectField {  
                     name
                     dataType
+                    ProjectV2SingleSelectFieldOption {
+                      color 
+                      description
+                      name
+                    }
                   }
                   ... on ProjectV2IterationField {
                     name
