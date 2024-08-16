@@ -40,4 +40,30 @@ jobs:
         project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 4) | .id' projects.json)
         echo "project_id=$project_id" >> $GITHUB_ENV
 
-        
+    - name: Get Project Fields
+      run: |
+        gh api graphql -f query='
+        query {
+          node(id: "'${{ env.project_id }}'") {
+            ... on ProjectV2 {
+              title
+              fields(first: 100) {
+                nodes {
+                  ... on ProjectV2FieldCommon {
+                    name
+                    dataType
+                  }
+                  ... on ProjectV2SingleSelectField {
+                    name
+                    dataType
+                  }
+                  ... on ProjectV2IterationField {
+                    name
+                    dataType
+                  }
+                }
+              }
+            }
+          }
+        }' > project_fields.json
+        cat project_fields.json
