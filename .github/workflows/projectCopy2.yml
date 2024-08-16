@@ -74,40 +74,8 @@ jobs:
         echo "title=$title" >> $GITHUB_ENV
         echo "fields=$fields" >> $GITHUB_ENV
 
-    - name: Create Token
-      id: create-token2
-      uses: actions/create-github-app-token@v1
-      with:
-        app-id: ${{ secrets.A2_APP_ID }}
-        private-key: ${{ secrets.A2_PEM }}
-        owner: si-sa-a2
-        repositories: test2
-
-    - name: Authenticate with CLI
+    - name: Get Project Fields
       run: |
-        echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
-
-    - name: Create new project
-      run: |
-        gh api graphql -f query='
-        mutation {
-          createProjectV2(input: {ownerId: "si-sa-a2", title: "'${{ env.title }}'"}) {
-            projectV2 {
-              id
-            }
-          }
-        }' > new_project.json
-        cat new_project.json
-
-        new_project_id=$(jq -r '.data.createProjectV2.projectV2.id' new_project.json)
-        echo "new_project_id=$new_project_id" >> $GITHUB_ENV
-
-    - name: Add fields to new project
-      run: |
-        fields=$(echo '${{ env.fields }}' | jq -c '.[]')
-        for field in $fields; do
-          name=$(echo $field | jq -r '.name')
-          dataType=$(echo $field | jq -r '.dataType')
-          # Add field creation logic here, as gh CLI does not support field creation directly
-          echo "Field: $name, Type: $dataType"
-        done
+        gh project fields list --project-id ${{ env.project_id }} > project_fields2.json
+        cat project_fields2.json
+        
