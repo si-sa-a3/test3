@@ -44,7 +44,7 @@ jobs:
       run: |
         gh api graphql -f query='
         query {
-          node(id: "'${{ env.project_id }}'") {
+          node(id: 4) {
             ... on ProjectV2 {
               title
               fields(first: 100) {
