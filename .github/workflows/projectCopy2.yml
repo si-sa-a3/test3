@@ -28,54 +28,16 @@ jobs:
             projectsV2(first: 10) {
               nodes {
                 id
+                number
                 title
-                fields(first: 100) {
-                  nodes {
-                    name
-                    dataType
-                  }
-                }
               }
             }
           }
-        }' > original_project.json
-        cat original_project.json
+        }' > projects.json
+        cat projects.json
 
-        # Extract necessary information
-        title=$(jq -r '.title' original_project.json)
-        description=$(jq -r '.description' original_project.json)
+        # Extract the project ID for the specific project number
+        project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 4) | .id' projects.json)
+        echo "project_id=$project_id" >> $GITHUB_ENV
 
-        echo "title=$title" >> $GITHUB_ENV
-
-    - name: Create Token
-      id: create-token2
-      uses: actions/create-github-app-token@v1
-      with:
-        app-id: ${{ secrets.A2_APP_ID }}
-        private-key: ${{ secrets.A2_PEM }}
-        owner: si-sa-a2
-        repositories: test2
-
-    - name: Authenticate with CLI
-      run: |
-        echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
-
-      # Step 2: Create new project
-    - name: Create new project
-      run: |
-        gh project create --owner si-sa-a2 --title "$title"
-
-    - name: Get new project ID
-      id: get_new_project_id
-      run: |
-        new_project_id=$(gh project list --owner si-sa-a2 --format json --jq '.projects[] | select(.title == "$title") | .id')
-        echo "::set-output name=new_project_id::$new_project_id"
-
-    - name: Add fields to new project
-      run: |
-        fields=$(jq -c '.fields[]' original_project.json)
-        for field in $fields; do
-          name=$(echo $field | jq -r '.name')
-          dataType=$(echo $field | jq -r '.dataType')
-          gh project field create --project-id "${{ steps.get_new_project_id.outputs.new_project_id }}" --name "$name" --type "$dataType"
-        done
+        
