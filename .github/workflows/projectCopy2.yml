@@ -76,5 +76,5 @@ jobs:
 
     - name: Get Project Fields
       run: |
-        gh project fields list ${{ env.project_id }} --owner si-sa-a3 > project_fields2.json
+        gh project field-list 4 --owner si-sa-a3 > project_fields2.json
         cat project_fields2.json
