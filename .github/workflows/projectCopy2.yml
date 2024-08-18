@@ -115,6 +115,10 @@ jobs:
                       }
                     }
                   }
+                  ... on ProjectV2FieldCommon {
+                    name
+                    dataType
+                  }
                 }
               }
               items(first: 100) {
