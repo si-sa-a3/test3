@@ -1,4 +1,4 @@
-name: Copy Project4
+name: Copy Project V2 Views
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
 jobs:
   create:
     runs-on: ubuntu-latest
+
     steps:
     - name: Create Token
       id: create-token
@@ -60,19 +61,20 @@ jobs:
         }' -F projectId=${{ env.source_project_id }} > source_views.json
         cat source_views.json
 
-        # Extract the view ID
-        view_id=$(jq -r '.data.node.views.nodes[0].id' source_views.json)  # Adjust index as needed
-        echo "view_id=$view_id" >> $GITHUB_ENV
-
-    - name: Create View in Target Project
+    - name: Create Views in Target Project
       run: |
-        gh api graphql -f query='
-        mutation($projectId: ID!, $viewName: String!) {
-          createProjectV2View(input: {projectId: $projectId, name: $viewName}) {
-            view {
-              id
-              name
+        for view_id in $(jq -r '.data.node.views.nodes[] | .id' source_views.json); do
+          view_name=$(jq -r --arg id "$view_id" '.data.node.views.nodes[] | select(.id == $id) | .name' source_views.json)
+          echo "Creating view $view_name in target project..."
+
+          gh api graphql -f query='
+          mutation($projectId: ID!, $viewName: String!) {
+            createProjectV2View(input: {projectId: $projectId, name: $viewName}) {
+              projectV2View {
+                id
+                name
+              }
             }
-          }
-        }' -F projectId=${{ env.target_project_id }} -F viewName="Copied View Name" > create_view_response.json
-        cat create_view_response.json
+          }' -F projectId=${{ env.target_project_id }} -F viewName="$view_name" > create_view_response.json
+          cat create_view_response.json
+        done
