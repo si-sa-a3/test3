@@ -44,23 +44,25 @@ jobs:
         echo "target_project_id=$target_project_id" >> $GITHUB_ENV
       
     - name: Fetch Source Project Views
-      id: fetch-views
-      run: |
-        gh api graphql -f query='
-        query($projectId: ID!) {
-          node(id: $projectId) {
-            ... on ProjectV2 {
-              views(first: 100) {
-                nodes {
+    run: |
+      gh api graphql -f query='
+      query($projectId: ID!) {
+        node(id: $projectId) {
+          ... on ProjectV2 {
+            views(first: 100) {
+              nodes {
                 id
                 name
-                layout
-                }
               }
             }
           }
-        }' -F projectId=${{ secrets.SOURCE_PROJECT_ID }} > source_views.json
-        cat source_views.json
+        }
+      }' -F projectId=${{ env.source_project_id }} > source_views.json
+      cat source_views.json
+
+    # Extract the view ID
+    view_id=$(jq -r '.data.node.views.nodes[] | .id' source_views.json)
+    echo "view_id=$view_id" >> $GITHUB_ENV
 
     - name: Extract View Information
       id: extract-view-info
