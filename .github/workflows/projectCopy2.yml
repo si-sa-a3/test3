@@ -95,7 +95,6 @@ jobs:
                 nodes {
                   id
                   content {
-                    __typename
                     ... on DraftIssue {
                       title
                     }
@@ -107,5 +106,5 @@ jobs:
               }
             }
           }
-        }' > project_data.json
+        }' -F projectId=${{ env.project_id }} > project_data.json
         cat project_data.json
