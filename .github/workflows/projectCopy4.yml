@@ -42,7 +42,7 @@ jobs:
 
         target_project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 5) | .id' projects.json)
         echo "target_project_id=$target_project_id" >> $GITHUB_ENV
-      
+
     - name: Fetch Source Project Views
       run: |
         gh api graphql -f query='
@@ -61,12 +61,6 @@ jobs:
         cat source_views.json
 
         # Extract the view ID
-        view_id=$(jq -r '.data.node.views.nodes[] | .id' source_views.json)
-        echo "view_id=$view_id" >> $GITHUB_ENV
-
-    - name: Extract View Information
-      id: extract-view-info
-      run: |
         view_id=$(jq -r '.data.node.views.nodes[0].id' source_views.json)  # Adjust index as needed
         echo "view_id=$view_id" >> $GITHUB_ENV
 
@@ -80,7 +74,7 @@ jobs:
               name
             }
           }
-        }' -F projectId=${{ secrets.TARGET_PROJECT_ID }} -F viewName="Copied View Name" > create_view_response.json
+        }' -F projectId=${{ env.target_project_id }} -F viewName="Copied View Name" > create_view_response.json
         cat create_view_response.json
 
     - name: Get Project Items
@@ -160,9 +154,7 @@ jobs:
                 }
               }
             }' -F projectId=${{ env.target_project_id }} -F issueId=$item_id)
-          fi
-
-          if [ "$content_type" == "DraftIssue" ]; then
+          elif [ "$content_type" == "DraftIssue" ]; then
             response=$(gh api graphql -f query='
             mutation($projectId: ID!, $draftIssueId: ID!) {
               addProjectV2ItemById(input: {projectId: $projectId, contentId: $draftIssueId}) {
