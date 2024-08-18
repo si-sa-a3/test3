@@ -57,6 +57,7 @@ jobs:
                     ... on DraftIssue {
                       id
                       title
+                      body
                     }
                     ... on Issue {
                       id
@@ -76,6 +77,7 @@ jobs:
           content_id=$(echo "$item" | jq -r '.content.id')
           content_type=$(echo "$item" | jq -r '.content.__typename')
           content_title=$(echo "$item" | jq -r '.content.title')
+          content_body=$(echo "$item" | jq -r '.content.body')
 
           echo "Adding item with ID $content_id and title $content_title to the new project"
 
@@ -88,15 +90,17 @@ jobs:
                 }
               }
             }' -F projectId=${{ env.target_project_id }} -F issueId=$content_id)
-          else
+          elif [ "$content_type" == "DraftIssue" ]; then
             response=$(gh api graphql -f query='
-            mutation($projectId: ID!, $issueId: ID!) {
-              addProjectV2DraftIssue(input: {projectId: $projectId title: $content_title body: "BODY"}) {
+            mutation($projectId: ID!, $title: String!, $body: String!) {
+              addProjectV2DraftIssue(input: {projectId: $projectId, title: $title, body: $body}) {
                 projectItem {
                   id
                 }
               }
-            }' -F projectId=${{ env.target_project_id }} -F content_title=${{ env.content_title }})
+            }' -F projectId=${{ env.target_project_id }} -F title="$content_title" -F body="$content_body" )
+          else
+            echo "Content type $content_type with ID $content_id is not supported for adding to the project."
           fi
 
           echo "Response: $response"
