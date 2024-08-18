@@ -25,7 +25,7 @@ jobs:
         gh api graphql -f query='
         query {
           organization(login: "si-sa-a3") {
-            projectsV2(number: 4) {
+            projectsV2(number: ${GITHUB_PROJECT_NUMBER}) {
               nodes {
                 id
                 number
