@@ -25,7 +25,7 @@ jobs:
         gh api graphql -f query='
         query {
           organization(login: "si-sa-a3") {
-            projectsV2(first: 10) {
+            projectsV2(number: 4) {
               nodes {
                 id
                 number
@@ -83,3 +83,9 @@ jobs:
       run: |
         gh project field-list 4 --owner si-sa-a3 > project_fields2.json
         cat project_fields2.json
+
+    - name: Get columns from the source project
+      run: |
+        gh api -H "Accept: application/vnd.github.inertia-preview+json" \
+          /projects/$PROJECT_ID/columns > columns.json
+        cat columns.json
