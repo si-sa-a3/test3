@@ -50,10 +50,16 @@ jobs:
           node(id: $projectId) {
             ... on Project {
               columns(first: 100) {
-                nodes [{
+                nodes {
                   id
                   name
-                }]
+                }
+                edges {
+                  node {
+                    id
+                    name
+                  }
+                }
               }
             }
           }
