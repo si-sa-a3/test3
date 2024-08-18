@@ -129,7 +129,7 @@ jobs:
                   id
                 }
               }
-            }' -F projectId=${{ env.TARGET_PROJECT_ID }} -F issueId=$item_id
+            }' -F projectId=5 -F issueId=$item_id
           elif [ "$content_type" == "DraftIssue" ]; then
             # Add draft issue to the target project
             gh api graphql -f query='
@@ -139,6 +139,6 @@ jobs:
                   id
                 }
               }
-            }' -F projectId=${{ env.TARGET_PROJECT_ID }} -F draftIssueId=$item_id
+            }' -F projectId=5 -F draftIssueId=$item_id
           fi
         done
