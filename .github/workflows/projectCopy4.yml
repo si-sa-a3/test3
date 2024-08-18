@@ -1,4 +1,4 @@
-name: Copy Project3
+name: Copy Project4
 
 on:
   workflow_dispatch:
@@ -48,7 +48,7 @@ jobs:
         gh api graphql -f query='
         query($projectId: ID!) {
           node(id: $projectId) {
-            ... on ProjectV2 {
+            ... on Project {
               columns(first: 100) {
                 nodes {
                   id
@@ -58,16 +58,15 @@ jobs:
             }
           }
         }' -F projectId=${{ env.source_project_id }} > source_columns.json
-        cat source_columns.json
 
-        # Create the same columns in the target project
+    - name: Create Columns in New Project
+      run: |
         cat source_columns.json | jq -c '.data.node.columns.nodes[]' | while read -r column; do
           column_name=$(echo "$column" | jq -r '.name')
-
           echo "Creating column with name $column_name in the target project"
           gh api graphql -f query='
           mutation($projectId: ID!, $name: String!) {
-            createProjectV2Column(input: {projectId: $projectId, name: $name}) {
+            createProjectColumn(input: {projectId: $projectId, name: $name}) {
               column {
                 id
                 name
