@@ -93,8 +93,28 @@ jobs:
               title
               fields(first: 100) {
                 nodes {
+                  __typename
                   name
                   dataType
+                  ... on ProjectV2SingleSelectField {
+                    options {
+                      id
+                      name
+                      color
+                      description
+                    }
+                  }
+                  ... on ProjectV2IterationField {
+                    configuration {
+                      duration
+                      startDay
+                      iterations {
+                        title
+                        startDate
+                        duration
+                      }
+                    }
+                  }
                 }
               }
               items(first: 100) {
