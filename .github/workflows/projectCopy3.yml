@@ -20,7 +20,7 @@ jobs:
       run: |
         echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
 
-    - name: Fetch Project ID
+    - name: Fetch Project IDs
       run: |
         gh api graphql -f query='
         query {
@@ -36,9 +36,9 @@ jobs:
         }' > projects.json
         cat projects.json
 
-        # Extract the project ID for the specific project number
-        project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 4) | .id' projects.json)
-        echo "project_id=$project_id" >> $GITHUB_ENV
+        # Extract the project ID for the specific project numbers
+        source_project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 4) | .id' projects.json)
+        echo "source_project_id=$source_project_id" >> $GITHUB_ENV
 
         target_project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 5) | .id' projects.json)
         echo "target_project_id=$target_project_id" >> $GITHUB_ENV
@@ -55,9 +55,11 @@ jobs:
                   content {
                     __typename
                     ... on DraftIssue {
+                      id
                       title
                     }
                     ... on Issue {
+                      id
                       title
                     }
                   }
@@ -65,18 +67,17 @@ jobs:
               }
             }
           }
-        }' -F projectId=${{ env.project_id }} > project_data.json
+        }' -F projectId=${{ env.source_project_id }} > project_data.json
         cat project_data.json
 
     - name: Add Items to New Project
       run: |
-        # itemを繰り返し、新しいプロジェクトに追加する
         cat project_data.json | jq -c '.data.node.items.nodes[]' | while read -r item; do
-          item_id=$(echo "$item" | jq -r '.id')
+          content_id=$(echo "$item" | jq -r '.content.id')
           content_type=$(echo "$item" | jq -r '.content.__typename')
           content_title=$(echo "$item" | jq -r '.content.title')
 
-          echo "Adding item with ID $item_id and title $content_title to the new project"
+          echo "Adding item with ID $content_id and title $content_title to the new project"
 
           if [ "$content_type" == "Issue" ]; then
             response=$(gh api graphql -f query='
@@ -86,7 +87,7 @@ jobs:
                   id
                 }
               }
-            }' -F projectId=${{ env.target_project_id }} -F issueId=$item_id)
+            }' -F projectId=${{ env.target_project_id }} -F issueId=$content_id)
           elif [ "$content_type" == "DraftIssue" ]; then
             response=$(gh api graphql -f query='
             mutation($projectId: ID!, $draftIssueId: ID!) {
@@ -95,7 +96,7 @@ jobs:
                   id
                 }
               }
-            }' -F projectId=${{ env.target_project_id }} -F draftIssueId=$item_id)
+            }' -F projectId=${{ env.target_project_id }} -F draftIssueId=$content_id)
           fi
 
           echo "Response: $response"
