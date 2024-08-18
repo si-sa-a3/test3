@@ -51,13 +51,11 @@ jobs:
           node(id: $projectId) {
             ... on ProjectV2 {
               views(first: 100) {
-                nodes {
+                id
+                name
+                layout {
                   id
                   name
-                  layout {
-                    id
-                    name
-                  }
                 }
               }
             }
