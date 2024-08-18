@@ -89,7 +89,14 @@ jobs:
               }
             }' -F projectId=${{ env.target_project_id }} -F issueId=$content_id)
           else
-            echo "Skipping content type $content_type for ID $content_id as it is not supported for adding to the project."
+            response=$(gh api graphql -f query='
+            mutation($projectId: ID!, $issueId: ID!) {
+              addProjectV2DraftIssue(input: {projectId: $projectId title: $content_title body: "BODY"}) {
+                projectItem {
+                  id
+                }
+              }
+            }' -F projectId=${{ env.target_project_id }} -F content_title=${{ env.content_title }})
           fi
 
           echo "Response: $response"
