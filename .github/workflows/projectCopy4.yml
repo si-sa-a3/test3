@@ -52,10 +52,9 @@ jobs:
             ... on ProjectV2 {
               views(first: 100) {
                 nodes {
-                layout {
-                    id
-                    name
-                  }
+                id
+                name
+                layout
                 }
               }
             }
