@@ -1,0 +1,102 @@
+name: Copy Project2
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Token
+      id: create-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.PEM }}
+        owner: si-sa-a3
+        repositories: test3
+
+    - name: Authenticate with CLI
+      run: |
+        echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
+
+    - name: Fetch Project ID
+      run: |
+        gh api graphql -f query='
+        query {
+          organization(login: "si-sa-a3") {
+            projectsV2(first: 100) {
+              nodes {
+                id
+                number
+                title
+              }
+            }
+          }
+        }' > projects.json
+        cat projects.json
+
+        # Extract the project ID for the specific project number
+        project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 4) | .id' projects.json)
+        echo "project_id=$project_id" >> $GITHUB_ENV
+
+    - name: Set Target Project ID
+      run: echo "TARGET_PROJECT_ID=5" >> $GITHUB_ENV
+      
+    - name: Get Project Items
+      run: |
+        gh api graphql -f query='
+        query($projectId: ID!) {
+          node(id: $projectId) {
+            ... on ProjectV2 {
+              items(first: 100) {
+                nodes {
+                  id
+                  content {
+                    __typename
+                    ... on DraftIssue {
+                      title
+                    }
+                    ... on Issue {
+                      title
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }' -F projectId=${{ env.project_id }} > project_data.json
+        cat project_data.json
+
+    - name: Add Items to New Project
+      run: |
+        # itemを繰り返し、新しいプロジェクトに追加する
+        cat project_data.json | jq -c '.data.node.items.nodes[]' | while read -r item; do
+          item_id=$(echo "$item" | jq -r '.id')
+          content_type=$(echo "$item" | jq -r '.content.__typename')
+          content_title=$(echo "$item" | jq -r '.content.title')
+
+          echo "Adding item with ID $item_id and title $content_title to the new project"
+
+          if [ "$content_type" == "Issue" ]; then
+            response=$(gh api graphql -f query='
+            mutation($projectId: ID!, $issueId: ID!) {
+              addProjectV2ItemById(input: {projectId: $projectId, contentId: $issueId}) {
+                item {
+                  id
+                }
+              }
+            }' -F projectId=${{ env.TARGET_PROJECT_ID }} -F issueId=$item_id)
+          elif [ "$content_type" == "DraftIssue" ]; then
+            response=$(gh api graphql -f query='
+            mutation($projectId: ID!, $draftIssueId: ID!) {
+              addProjectV2ItemById(input: {projectId: $projectId, contentId: $draftIssueId}) {
+                item {
+                  id
+                }
+              }
+            }' -F projectId=${{ env.TARGET_PROJECT_ID }} -F draftIssueId=$item_id)
+          fi
+
+          echo "Response: $response"
+        done
