@@ -15,17 +15,17 @@ jobs:
         private-key: ${{ secrets.PEM }}
         owner: si-sa-a3
         repositories: test3
-        
+
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
 
-    - name: Copy GitHub Project
+    - name: Fetch Project ID
       run: |
         gh api graphql -f query='
         query {
           organization(login: "si-sa-a3") {
-            projectsV2(number: ${GITHUB_PROJECT_NUMBER}) {
+            projectsV2(first: 100) {
               nodes {
                 id
                 number
@@ -56,10 +56,10 @@ jobs:
                   ... on ProjectV2SingleSelectField {  
                     name
                     dataType
-                    ProjectV2SingleSelectFieldOption {
-                      color 
-                      description
+                    options {
                       name
+                      color
+                      description
                     }
                   }
                   ... on ProjectV2IterationField {
@@ -79,7 +79,7 @@ jobs:
         echo "title=$title" >> $GITHUB_ENV
         echo "fields=$fields" >> $GITHUB_ENV
 
-    - name: Get Project Fields
+    - name: Get Additional Project Details
       run: |
         gh project field-list 4 --owner si-sa-a3 > project_fields2.json
         cat project_fields2.json
@@ -87,5 +87,5 @@ jobs:
     - name: Get columns from the source project
       run: |
         gh api -H "Accept: application/vnd.github.inertia-preview+json" \
-          /projects/$PROJECT_ID/columns > columns.json
+          /projects/${{ env.project_id }}/columns > columns.json
         cat columns.json
