@@ -94,6 +94,7 @@ jobs:
               items(first: 100) {
                 nodes {
                   id
+                  type
                   content {
                     ... on DraftIssue {
                       title
@@ -108,3 +109,36 @@ jobs:
           }
         }' > project_data.json
         cat project_data.json
+
+    - name: Add Items to New Project
+      run: |
+        # itemを繰り返し、新しいプロジェクトに追加する
+        cat project_data.json | jq -c '.data.node.items.nodes[]' | while read -r item; do
+          item_id=$(echo "$item" | jq -r '.id')
+          content_type=$(echo "$item" | jq -r '.type')
+          content_title=$(echo "$item" | jq -r '.content.title')
+
+          echo "Adding item with ID $item_id and title $content_title to the new project"
+
+          if [ "$content_type" == "Issue" ]; then
+            # Add issue to the target project
+            gh api graphql -f query='
+            mutation($projectId: ID!, $issueId: ID!) {
+              addProjectV2ItemById(input: {projectId: $projectId, contentId: $issueId}) {
+                item {
+                  id
+                }
+              }
+            }' -F projectId=${{ env.TARGET_PROJECT_ID }} -F issueId=$item_id
+          elif [ "$content_type" == "DraftIssue" ]; then
+            # Add draft issue to the target project
+            gh api graphql -f query='
+            mutation($projectId: ID!, $draftIssueId: ID!) {
+              addProjectV2ItemById(input: {projectId: $projectId, contentId: $draftIssueId}) {
+                item {
+                  id
+                }
+              }
+            }' -F projectId=${{ env.TARGET_PROJECT_ID }} -F draftIssueId=$item_id
+          fi
+        done
