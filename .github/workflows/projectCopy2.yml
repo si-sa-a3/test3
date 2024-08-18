@@ -81,11 +81,37 @@ jobs:
 
     - name: Get Additional Project Details
       run: |
-        gh project field-list 4 --owner si-sa-a3 > project_fields2.json
+        gh project field-list 4 --owner si-sa-a3 --format json > project_fields2.json
         cat project_fields2.json
 
-    - name: Get columns from the source project
+    - name: Get Project Fields and Columns
       run: |
-        gh api -H "Accept: application/vnd.github.inertia-preview+json" \
-          /projects/${{ env.project_id }}/columns > columns.json
-        cat columns.json
+        gh api graphql -f query='
+        query($projectId: ID!) {
+          node(id: $projectId) {
+            ... on ProjectV2 {
+              title
+              fields(first: 100) {
+                nodes {
+                  name
+                  dataType
+                }
+              }
+              items(first: 100) {
+                nodes {
+                  id
+                  content {
+                    __typename
+                    ... on DraftIssue {
+                      title
+                    }
+                    ... on Issue {
+                      title
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }' -F projectId=${{ env.project_id }} > project_data.json
+        cat project_data.json
