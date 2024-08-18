@@ -88,17 +88,8 @@ jobs:
                 }
               }
             }' -F projectId=${{ env.target_project_id }} -F issueId=$content_id)
-          elif [ "$content_type" == "DraftIssue" ]; then
-            response=$(gh api graphql -f query='
-            mutation($projectId: ID!, $draftIssueId: ID!) {
-              addProjectV2ItemById(input: {projectId: $projectId, contentId: $draftIssueId}) {
-                item {
-                  id
-                }
-              }
-            }' -F projectId=${{ env.target_project_id }} -F draftIssueId=$content_id)
           else
-            echo "Error: Content type $content_type is not supported for adding to the project."
+            echo "Skipping content type $content_type for ID $content_id as it is not supported for adding to the project."
           fi
 
           echo "Response: $response"
