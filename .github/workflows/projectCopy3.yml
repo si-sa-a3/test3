@@ -97,6 +97,8 @@ jobs:
                 }
               }
             }' -F projectId=${{ env.target_project_id }} -F draftIssueId=$content_id)
+          else
+            echo "Error: Content type $content_type is not supported for adding to the project."
           fi
 
           echo "Response: $response"
