@@ -91,36 +91,6 @@ jobs:
           node(id: $projectId) {
             ... on ProjectV2 {
               title
-              fields(first: 100) {
-                nodes {
-                  __typename
-                  name
-                  dataType
-                  ... on ProjectV2SingleSelectField {
-                    options {
-                      id
-                      name
-                      color
-                      description
-                    }
-                  }
-                  ... on ProjectV2IterationField {
-                    configuration {
-                      duration
-                      startDay
-                      iterations {
-                        title
-                        startDate
-                        duration
-                      }
-                    }
-                  }
-                  ... on ProjectV2FieldCommon {
-                    name
-                    dataType
-                  }
-                }
-              }
               items(first: 100) {
                 nodes {
                   id
@@ -137,5 +107,5 @@ jobs:
               }
             }
           }
-        }' -F projectId=${{ env.project_id }} > project_data.json
+        }' > project_data.json
         cat project_data.json
