@@ -43,43 +43,41 @@ jobs:
         target_project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 5) | .id' projects.json)
         echo "target_project_id=$target_project_id" >> $GITHUB_ENV
       
-    - name: Get Source Project Columns
+    - name: Get View Layout Details
       run: |
         gh api graphql -f query='
-        query($projectId: ID!) {
-          node(id: $projectId) {
-            ... on Project {
-              columns(first: 100) {
-                nodes {
+        query($viewId: ID!) {
+          node(id: $viewId) {
+            ... on ProjectV2View {
+              id
+              name
+              layout {
+                id
+                name
+                columns {
                   id
                   name
-                }
-                edges {
-                  node {
-                    id
-                    name
-                  }
                 }
               }
             }
           }
-        }' -F projectId=${{ env.source_project_id }} > source_columns.json
-        cat source_columns.json
+        }' -F viewId=${{ env.view_id }} > view_layout.json
+        cat view_layout.json
 
-    - name: Create Columns in Target Project
+    - name: Create View in Target Project
       run: |
-        cat source_columns.json | jq -c '.data.node.columns.nodes[]' | while read -r column; do
-          column_name=$(echo "$column" | jq -r '.name')
-          echo "Creating column with name $column_name in the target project"
+        cat source_views.json | jq -c '.data.node.views.nodes[]' | while read -r view; do
+          view_name=$(echo "$view" | jq -r '.name')
+          echo "Creating view with name $view_name in the target project"
           gh api graphql -f query='
           mutation($projectId: ID!, $name: String!) {
-            createProjectColumn(input: {projectId: $projectId, name: $name}) {
-              column {
+            createProjectV2View(input: {projectId: $projectId, name: $name}) {
+              view {
                 id
                 name
               }
             }
-          }' -F projectId=${{ env.target_project_id }} -F name="$column_name"
+          }' -F projectId=${{ env.target_project_id }} -F name="$view_name"
         done
 
     - name: Get Project Items
