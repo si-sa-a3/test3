@@ -1,4 +1,4 @@
-name: Copy Project2
+name: Copy Project3
 
 on:
   workflow_dispatch:
@@ -40,8 +40,8 @@ jobs:
         project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 4) | .id' projects.json)
         echo "project_id=$project_id" >> $GITHUB_ENV
 
-    - name: Set Target Project ID
-      run: echo "TARGET_PROJECT_ID=5" >> $GITHUB_ENV
+        target_project_id=$(jq -r '.data.organization.projectsV2.nodes[] | select(.number == 5) | .id' projects.json)
+        echo "target_project_id=$target_project_id" >> $GITHUB_ENV
       
     - name: Get Project Items
       run: |
@@ -86,7 +86,7 @@ jobs:
                   id
                 }
               }
-            }' -F projectId=${{ env.TARGET_PROJECT_ID }} -F issueId=$item_id)
+            }' -F projectId=${{ env.target_project_id }} -F issueId=$item_id)
           elif [ "$content_type" == "DraftIssue" ]; then
             response=$(gh api graphql -f query='
             mutation($projectId: ID!, $draftIssueId: ID!) {
@@ -95,7 +95,7 @@ jobs:
                   id
                 }
               }
-            }' -F projectId=${{ env.TARGET_PROJECT_ID }} -F draftIssueId=$item_id)
+            }' -F projectId=${{ env.target_project_id }} -F draftIssueId=$item_id)
           fi
 
           echo "Response: $response"
