@@ -87,8 +87,8 @@ jobs:
     - name: Get Project Fields and Columns
       run: |
         gh api graphql -f query='
-        query($projectId: ID!) {
-          node(id: $projectId) {
+        query {
+          node(id: "'${{ env.project_id }}'") {
             ... on ProjectV2 {
               title
               items(first: 100) {
@@ -106,5 +106,5 @@ jobs:
               }
             }
           }
-        }' -F projectId=${{ env.project_id }} > project_data.json
+        }' > project_data.json
         cat project_data.json
