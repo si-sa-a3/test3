@@ -67,14 +67,15 @@ jobs:
           view_name=$(jq -r --arg id "$view_id" '.data.node.views.nodes[] | select(.id == $id) | .name' source_views.json)
           echo "Creating view $view_name in target project..."
 
+          # Create view in the target project
           gh api graphql -f query='
-          mutation($projectId: ID!, $viewName: String!) {
-            createProjectV2View(input: {projectId: $projectId, name: $viewName}) {
+          mutation($input: CreateProjectV2ViewInput!) {
+            createProjectV2View(input: $input) {
               projectV2View {
                 id
                 name
               }
             }
-          }' -F projectId=${{ env.target_project_id }} -F viewName="$view_name" > create_view_response.json
+          }' -F input='{"projectId": "${{ env.target_project_id }}", "name": "'"$view_name"'"}' > create_view_response.json
           cat create_view_response.json
         done
