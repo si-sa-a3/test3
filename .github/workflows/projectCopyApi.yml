@@ -36,11 +36,13 @@ jobs:
         source_project_id=$(gh api graphql -f query='
         query {
           organization(login: "si-sa-a3") {
-            projectsV2(number: 4) {
-              id
+            projectsV2(first: 100) {
+              nodes {
+                id
+              }
             }
           }
-        }' --jq '.data.organization.projectV2.id')
+        }' --jq '.data.organization.projectsV2.nodes.id')
         echo "SOURCE_PROJECT_ID=$source_project_id" >> $GITHUB_ENV
 
     - name: Get Target Organization ID
