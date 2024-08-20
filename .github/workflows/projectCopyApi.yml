@@ -18,17 +18,6 @@ jobs:
     - name: Authenticate with CLI
       run: |
         echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
-    - name: Create Token
-      id: create-token2
-      uses: actions/create-github-app-token@v1
-      with:
-        app-id: ${{ secrets.A2_APP_ID }}
-        private-key: ${{ secrets.A2_PEM }}
-        owner: si-sa-a2
-        repositories: test2
-    - name: Authenticate with CLI
-      run: |
-        echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
 
     - name: Get Source Project ID
       id: get-source-id
