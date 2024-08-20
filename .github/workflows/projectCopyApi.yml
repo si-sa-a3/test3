@@ -31,7 +31,7 @@ jobs:
               }
             }
           }
-        }' --jq '.data.organization.projectsV2.nodes.id')
+        }' --jq '.data.organization.projectsV2.nodes[0].id')
         echo "SOURCE_PROJECT_ID=$source_project_id" >> $GITHUB_ENV
 
     - name: Get Target Organization ID
