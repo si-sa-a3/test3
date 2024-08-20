@@ -1,0 +1,67 @@
+name: Copy Project Api
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create Token
+      id: create-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.APP_ID }}
+        private-key: ${{ secrets.PEM }}
+        owner: si-sa-a3
+        repositories: test3
+    - name: Authenticate with CLI
+      run: |
+        echo "${{ steps.create-token.outputs.token }}" | gh auth login --with-token
+    - name: Create Token
+      id: create-token2
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ secrets.A2_APP_ID }}
+        private-key: ${{ secrets.A2_PEM }}
+        owner: si-sa-a2
+        repositories: test2
+    - name: Authenticate with CLI
+      run: |
+        echo "${{ steps.create-token2.outputs.token }}" | gh auth login --with-token
+
+    - name: Get Source Project ID
+      id: get-source-id
+      run: |
+        source_project_id=$(gh api graphql -f query='
+        query {
+          organization(login: "si-sa-a3") {
+            projectV2(number: 4) {
+              id
+            }
+          }
+        }' --jq '.data.organization.projectV2.id')
+        echo "SOURCE_PROJECT_ID=$source_project_id" >> $GITHUB_ENV
+
+    - name: Get Target Organization ID
+      id: get-target-id
+      run: |
+        target_org_id=$(gh api graphql -f query='
+        query {
+          organization(login: "si-sa-a3") {
+            id
+          }
+        }' --jq '.data.organization.id')
+        echo "TARGET_ORG_ID=$target_org_id" >> $GITHUB_ENV
+
+    - name: Copy ProjectV2
+      run: |
+        gh api graphql -f query='
+        mutation($sourceId: ID!, $targetId: ID!) {
+          copyProjectV2(input: {projectId: $sourceId, ownerId: $targetId, title: "api copied project"}) {
+            projectV2 {
+              id
+              title
+            }
+          }
+        }' -F sourceId="${{ env.SOURCE_PROJECT_ID }}" -F targetId="${{ env.TARGET_ORG_ID }}"

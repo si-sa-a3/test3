@@ -1,4 +1,4 @@
-name: Copy Project3
+name: item Copy
 
 on:
   workflow_dispatch:
