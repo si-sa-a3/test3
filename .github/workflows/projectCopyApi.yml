@@ -36,7 +36,7 @@ jobs:
         source_project_id=$(gh api graphql -f query='
         query {
           organization(login: "si-sa-a3") {
-            projectV2(first: 1) {
+            projectsV2(number: 4) {
               id
             }
           }
