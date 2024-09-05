@@ -23,4 +23,4 @@ jobs:
 
     - name: Disable Project
       run: |
-        gh workflow disable "blank.yml" --repo si-sa-a3/test3
+        gh workflow disable "disable.yml" --repo si-sa-a3/test3
